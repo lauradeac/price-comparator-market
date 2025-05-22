@@ -1,12 +1,14 @@
 package accesa.challenge.backend.service;
 
 import accesa.challenge.backend.domain.dto.ProductBestDiscountDTO;
+import accesa.challenge.backend.domain.dto.ProductNewDiscountDTO;
 import accesa.challenge.backend.domain.entity.ProductDiscount;
 import accesa.challenge.backend.repository.ProductDiscountRepository;
 import accesa.challenge.backend.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,4 +46,39 @@ public class ProductService {
                 .toList();
     }
 
+    /**
+     * Retrieves a list of discount entries where the discount was created on the same day or
+     * the day before the associated product's creation date
+     * (which corresponds to the date the product prices were fetched, as derived from the filename).
+     * The discount's createdAt field is automatically generated using a random date
+     * between five days before and the day of the discount's start date (`discountFromDate`),
+     * simulating when the discount was added.
+     *
+     * @return a list of ProductDiscount objects that meet the criteria.
+     */
+    public List<ProductNewDiscountDTO> getRecentDiscounts() {
+        return productDiscountRepository.findAll().stream()
+                .filter(discount -> {
+                    if (discount == null || discount.getProduct() == null || discount.getProduct().getProductId() == null) {
+                        return false;
+                    }
+                    LocalDate productCreatedDate = discount.getProduct().getProductId().getCreationDate();
+                    LocalDate discountCreatedDate = discount.getCreatedAt();
+                    if (productCreatedDate == null || discountCreatedDate == null) {
+                        return false;
+                    }
+                    LocalDate dayBeforeProductCreated = productCreatedDate.minusDays(1);
+                    return !discountCreatedDate.isBefore(dayBeforeProductCreated) &&
+                            !discountCreatedDate.isAfter(productCreatedDate);
+                })
+                .map(d -> new ProductNewDiscountDTO(
+                        d.getProduct().getProductName(),
+                        d.getProduct().getBrand(),
+                        d.getProduct().getProductId().getSupermarket(),
+                        d.getDiscountPercentage(),
+                        d.getCreatedAt(),
+                        d.getProduct().getProductId().getCreationDate()
+                ))
+                .toList();
+    }
 }

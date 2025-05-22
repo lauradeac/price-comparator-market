@@ -1,6 +1,8 @@
 package accesa.challenge.backend.controller;
 
 import accesa.challenge.backend.domain.dto.ProductBestDiscountDTO;
+import accesa.challenge.backend.domain.dto.ProductNewDiscountDTO;
+import accesa.challenge.backend.domain.entity.ProductDiscount;
 import accesa.challenge.backend.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,11 @@ public class ProductController {
     public ResponseEntity<List<ProductBestDiscountDTO>> getBestDiscounts() {
         List<ProductBestDiscountDTO> bestDiscounts = productService.getBestDiscounts();
         return ResponseEntity.ok(bestDiscounts);
+    }
+
+    @GetMapping("/new-discounts")
+        public ResponseEntity<List<ProductNewDiscountDTO>> getRecentDiscounts() {
+        return ResponseEntity.ok(productService.getRecentDiscounts());
     }
 
 }

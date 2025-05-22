@@ -21,6 +21,10 @@ public class ProductId implements Serializable {
     @Column(name = "product_id")
     private String productId;
 
+    /**
+     * The date when the product's price data was collected from the supermarket,
+     * extracted from the CSV file name.
+     */
     @Column(name = "creation_date")
     private LocalDate creationDate;
 
