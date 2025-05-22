@@ -2,6 +2,9 @@ package accesa.challenge.backend.service;
 
 import accesa.challenge.backend.domain.dto.ProductBestDiscountDTO;
 import accesa.challenge.backend.domain.dto.ProductNewDiscountDTO;
+import accesa.challenge.backend.domain.dto.ProductPriceHistoryDTO;
+import accesa.challenge.backend.domain.dto.ProductPricePointDTO;
+import accesa.challenge.backend.domain.entity.Product;
 import accesa.challenge.backend.domain.entity.ProductDiscount;
 import accesa.challenge.backend.repository.ProductDiscountRepository;
 import accesa.challenge.backend.repository.ProductRepository;
@@ -81,4 +84,107 @@ public class ProductService {
                 ))
                 .toList();
     }
+
+    /**
+     * Retrieves the price history for products filtered by store, category, brand, and date range.
+     * For each product (grouped by productId and supermarket), it builds a history of price points
+     * for each day in the given range, including any applicable discounts.
+     *
+     * @param store     optional store name to filter products
+     * @param category  optional category to filter products
+     * @param brand     optional brand to filter products
+     * @param fromDate  start date of the price history range (inclusive)
+     * @param toDate    end date of the price history range (inclusive)
+     * @return a list of ProductPriceHistoryDTO, each containing the price history for a product
+     */
+    public List<ProductPriceHistoryDTO> getPriceHistoryWithRange(
+            String store, String category, String brand, LocalDate fromDate, LocalDate toDate
+    ) {
+        List<Product> products = productRepository.findAll();
+        if (products.isEmpty()) return List.of();
+
+        // Filter products
+        if (store != null)
+            products = products.stream().filter(p -> p.getProductId().getSupermarket().equals(store)).toList();
+        if (category != null)
+            products = products.stream().filter(p -> p.getProductCategory().equals(category)).toList();
+        if (brand != null)
+            products = products.stream().filter(p -> p.getBrand().equals(brand)).toList();
+
+        List<ProductDiscount> discounts = productDiscountRepository.findAll();
+
+        Map<String, List<ProductDiscount>> discountMap = discounts.stream()
+                .collect(Collectors.groupingBy(this::getProductDiscountKey));
+
+        Map<String, List<Product>> productMap = products.stream()
+                .collect(Collectors.groupingBy(this::getProductKey));
+
+        List<ProductPriceHistoryDTO> historyDTOList = new ArrayList<>();
+
+        productMap.forEach((key, productEntries) -> {
+            productEntries = productEntries.stream()
+                    .sorted(Comparator.comparing(p -> p.getProductId().getCreationDate()))
+                    .toList();
+
+            Product firstProduct = productEntries.get(0);
+            String[] keyParts = key.split("\\|");
+            String productId = keyParts[0];
+            String supermarket = keyParts[1];
+
+            ProductPriceHistoryDTO historyDTO = ProductPriceHistoryDTO.builder()
+                    .productId(productId)
+                    .productName(firstProduct.getProductName())
+                    .brand(firstProduct.getBrand())
+                    .supermarket(supermarket)
+                    .build();
+
+            for (LocalDate date = fromDate; !date.isAfter(toDate); date = date.plusDays(1)) {
+                Product latest = getLatestProductByDate(productEntries, date);
+                if (latest != null) {
+                    double originalPrice = latest.getPrice();
+                    double finalPrice = originalPrice;
+
+                    List<ProductDiscount> discountList = discountMap.getOrDefault(key, List.of());
+                    LocalDate finalDate = date;
+                    Optional<ProductDiscount> discountOpt = discountList.stream()
+                            .filter(d -> !finalDate.isBefore(d.getDiscountFromDate()) && !finalDate.isAfter(d.getDiscountToDate()))
+                            .findFirst();
+
+                    int discountPercentage = discountOpt.map(d -> d.getDiscountPercentage().intValue()).orElse(0);
+                    if (discountPercentage > 0) {
+                        finalPrice = originalPrice * (1 - discountPercentage / 100.0);
+                    }
+
+                    historyDTO.getPriceHistory().add(
+                            ProductPricePointDTO.builder()
+                                    .date(date)
+                                    .originalPrice(originalPrice)
+                                    .discountPercentage(discountPercentage)
+                                    .finalPrice(finalPrice)
+                                    .build()
+                    );
+                }
+            }
+            historyDTO.getPriceHistory().sort(Comparator.comparing(ProductPricePointDTO::getDate));
+            historyDTOList.add(historyDTO);
+        });
+
+        return historyDTOList;
+    }
+
+    private String getProductKey(Product product) {
+        return product.getProductId().getProductId() + "|" + product.getProductId().getSupermarket();
+    }
+
+    private String getProductDiscountKey(ProductDiscount discount) {
+        return discount.getProduct().getProductId().getProductId() + "|" + discount.getProduct().getProductId().getSupermarket();
+    }
+
+    private Product getLatestProductByDate(List<Product> products, LocalDate date) {
+        return products.stream()
+                .filter(p -> !p.getProductId().getCreationDate().isAfter(date))
+                .reduce((first, second) -> second)
+                .orElse(null);
+    }
+
 }
