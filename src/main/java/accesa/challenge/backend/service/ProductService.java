@@ -1,11 +1,9 @@
 package accesa.challenge.backend.service;
 
-import accesa.challenge.backend.domain.dto.ProductBestDiscountDTO;
-import accesa.challenge.backend.domain.dto.ProductNewDiscountDTO;
-import accesa.challenge.backend.domain.dto.ProductPriceHistoryDTO;
-import accesa.challenge.backend.domain.dto.ProductPricePointDTO;
+import accesa.challenge.backend.domain.dto.*;
 import accesa.challenge.backend.domain.entity.Product;
 import accesa.challenge.backend.domain.entity.ProductDiscount;
+import accesa.challenge.backend.domain.entity.ProductId;
 import accesa.challenge.backend.repository.ProductDiscountRepository;
 import accesa.challenge.backend.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -90,11 +88,11 @@ public class ProductService {
      * For each product (grouped by productId and supermarket), it builds a history of price points
      * for each day in the given range, including any applicable discounts.
      *
-     * @param store     optional store name to filter products
-     * @param category  optional category to filter products
-     * @param brand     optional brand to filter products
-     * @param fromDate  start date of the price history range (inclusive)
-     * @param toDate    end date of the price history range (inclusive)
+     * @param store    optional store name to filter products
+     * @param category optional category to filter products
+     * @param brand    optional brand to filter products
+     * @param fromDate start date of the price history range (inclusive)
+     * @param toDate   end date of the price history range (inclusive)
      * @return a list of ProductPriceHistoryDTO, each containing the price history for a product
      */
     public List<ProductPriceHistoryDTO> getPriceHistoryWithRange(
@@ -170,6 +168,91 @@ public class ProductService {
         });
 
         return historyDTOList;
+    }
+
+    /**
+     * Retrieves the best product recommendations for a given product name and date range.
+     * The recommendations are filtered by the specified product name and date range,
+     * and only the product with the lowest value per unit is included for each store.
+     * The discounts are not considered in this method.
+     *
+     * @param productName the name of the product to filter by
+     * @param fromDate    the start date of the date range (inclusive)
+     * @param toDate      the end date of the date range (inclusive)
+     * @return a list of ProductRecommendationDTO objects containing product recommendations
+     */
+    public List<ProductRecommendationDTO> getBestProductRecommendations(String productName, LocalDate fromDate, LocalDate toDate) {
+        // Filter products by name and date range
+        List<Product> products = productRepository.findAll().stream()
+                .filter(p -> p.getProductName() != null &&
+                        p.getProductName().toLowerCase().contains(productName.toLowerCase())
+                        && !p.getProductId().getCreationDate().isBefore(fromDate)
+                        && !p.getProductId().getCreationDate().isAfter(toDate))
+                .toList();
+
+        if (products.isEmpty()) return List.of();
+
+        List<ProductRecommendationDTO> recommendations = products.stream()
+                .map(this::mapProductToRecommendationDTO)
+                .toList();
+
+        // Group by store and select the best value per unit for each store
+        Map<String, ProductRecommendationDTO> bestPerStore = recommendations.stream()
+                .collect(Collectors.toMap(
+                        ProductRecommendationDTO::getStore,
+                        rec -> rec,
+                        (rec1, rec2) -> rec1.getValuePerUnit() <= rec2.getValuePerUnit() ? rec1 : rec2
+                ));
+
+        // Return sorted list by value per unit
+        return bestPerStore.values().stream()
+                .sorted(Comparator.comparing(ProductRecommendationDTO::getValuePerUnit))
+                .toList();
+    }
+
+    private ProductRecommendationDTO mapProductToRecommendationDTO(Product p) {
+        return ProductRecommendationDTO.builder()
+                .productId(p.getProductId().getProductId())
+                .productName(p.getProductName())
+                .brand(p.getBrand())
+                .store(p.getProductId().getSupermarket())
+                .date(p.getProductId().getCreationDate())
+                .packageQuantity(p.getPackageQuantity())
+                .packageUnit(p.getPackageUnit())
+                .price(p.getPrice())
+                .valuePerUnit(calculatePricePerUnit(p))
+                .build();
+    }
+
+    public double calculatePricePerUnit(Product p) {
+        if (p.getPackageQuantity() == null || p.getPackageQuantity() <= 0) {
+            throw new IllegalArgumentException("Package quantity must be greater than zero");
+        }
+        if (p.getPrice() == null || p.getPrice() < 0) {
+            throw new IllegalArgumentException("Price must be zero or positive");
+        }
+        double multiplier = getUnitMultiplier(p.getPackageUnit());
+        double quantityInStandardUnit = p.getPackageQuantity() * multiplier;
+
+        if (quantityInStandardUnit == 0) {
+            throw new IllegalArgumentException("Package quantity must be greater than zero");
+        }
+
+        return p.getPrice() / quantityInStandardUnit;
+    }
+
+    private double getUnitMultiplier(String unit) {
+        if (unit == null) {
+            throw new IllegalArgumentException("Package unit cannot be null");
+        }
+        return switch (unit.toLowerCase()) {
+            case "g" -> 0.001;  // grams to kilograms
+            case "ml" -> 0.001;  // milliliters to liters
+            case "kg" -> 1.0;    // kilograms
+            case "l" -> 1.0;    // liters
+            case "buc", "role" -> 1.0;   // count units: multiplier = 1
+            default -> throw new IllegalArgumentException("Unsupported unit: " + unit);
+        };
     }
 
     private String getProductKey(Product product) {

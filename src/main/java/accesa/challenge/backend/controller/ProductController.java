@@ -3,6 +3,7 @@ package accesa.challenge.backend.controller;
 import accesa.challenge.backend.domain.dto.ProductBestDiscountDTO;
 import accesa.challenge.backend.domain.dto.ProductNewDiscountDTO;
 import accesa.challenge.backend.domain.dto.ProductPriceHistoryDTO;
+import accesa.challenge.backend.domain.dto.ProductRecommendationDTO;
 import accesa.challenge.backend.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class ProductController {
     }
 
     @GetMapping("/new-discounts")
-        public ResponseEntity<List<ProductNewDiscountDTO>> getRecentDiscounts() {
+    public ResponseEntity<List<ProductNewDiscountDTO>> getRecentDiscounts() {
         return ResponseEntity.ok(productService.getRecentDiscounts());
     }
 
@@ -43,6 +44,17 @@ public class ProductController {
     ) {
         List<ProductPriceHistoryDTO> history = productService.getPriceHistoryWithRange(store, category, brand, startDate, endDate);
         return history.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(history);
+    }
+
+    // GET /recommendations?productName=iaurt grecesc&fromDate=2025-05-01&toDate=2025-05-15
+    @GetMapping("/recommendations")
+    public ResponseEntity<List<ProductRecommendationDTO>> getProductRecommendationsByNameAndDateRange(
+            @RequestParam String productName,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+
+        List<ProductRecommendationDTO> recommendations = productService.getBestProductRecommendations(productName, fromDate, toDate);
+        return recommendations.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(recommendations);
     }
 
 }
