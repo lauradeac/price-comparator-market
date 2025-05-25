@@ -8,7 +8,5 @@ import java.util.List;
 
 @Repository
 public interface PriceAlertRepository extends JpaRepository<PriceAlert, Integer> {
-
     List<PriceAlert> findByAlertTriggeredFalse();
-
 }

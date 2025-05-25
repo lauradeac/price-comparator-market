@@ -10,9 +10,6 @@ import java.util.List;
 
 @Repository
 public interface ProductDiscountRepository extends JpaRepository<ProductDiscount, ProductId> {
-
     boolean existsById(@NonNull ProductId productId);
-
     List<ProductDiscount> findByProductProductName(String productName);
-
 }

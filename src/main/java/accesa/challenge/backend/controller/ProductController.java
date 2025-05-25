@@ -56,5 +56,4 @@ public class ProductController {
         List<ProductRecommendationDTO> recommendations = productService.getBestProductRecommendations(productName, fromDate, toDate);
         return recommendations.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(recommendations);
     }
-
 }

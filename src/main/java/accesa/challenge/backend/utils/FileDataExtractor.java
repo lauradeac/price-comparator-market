@@ -1,11 +1,13 @@
 package accesa.challenge.backend.utils;
 
+import lombok.experimental.UtilityClass;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+@UtilityClass
 public class FileDataExtractor {
-
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public static String extractSupermarket(String filename) {

@@ -17,7 +17,6 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class PriceAlertScheduler {
-
     private final PriceAlertRepository alertRepository;
     private final ProductRepository productRepository;
     private final ProductDiscountRepository productDiscountRepository;
@@ -76,5 +75,4 @@ public class PriceAlertScheduler {
                     discount.getDiscountToDate());
         }
     }
-
 }

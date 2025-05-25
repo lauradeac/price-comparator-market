@@ -28,9 +28,7 @@ import static accesa.challenge.backend.utils.FileDataExtractor.*;
 @Service
 @RequiredArgsConstructor
 public class ImportService {
-
     private final ProductRepository productRepository;
-
     private final ProductDiscountRepository productDiscountRepository;
 
     /**
@@ -52,7 +50,6 @@ public class ImportService {
     public List<String> readAllDiscountCsvFiles() {
         return readCsvFiles("classpath:sample-data-files/*discounts*.csv", this::importDiscounts, false);
     }
-
 
     /**
      * Imports product data from the given CSV data and filename.
@@ -151,7 +148,6 @@ public class ImportService {
         }
         return importedFiles;
     }
-
 
     /**
      * Parses a single row of product data from the CSV file.

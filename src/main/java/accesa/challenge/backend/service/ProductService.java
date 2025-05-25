@@ -3,7 +3,6 @@ package accesa.challenge.backend.service;
 import accesa.challenge.backend.domain.dto.*;
 import accesa.challenge.backend.domain.entity.Product;
 import accesa.challenge.backend.domain.entity.ProductDiscount;
-import accesa.challenge.backend.domain.entity.ProductId;
 import accesa.challenge.backend.repository.ProductDiscountRepository;
 import accesa.challenge.backend.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +15,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProductService {
-
     private final ProductRepository productRepository;
-
     private final ProductDiscountRepository productDiscountRepository;
 
     /**
@@ -269,5 +266,4 @@ public class ProductService {
                 .reduce((first, second) -> second)
                 .orElse(null);
     }
-
 }
