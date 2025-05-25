@@ -54,8 +54,8 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody UserDTO userDto) {
-        User createdUser = userService.registerUser(userDto);
+    public ResponseEntity<User> addUser(@RequestBody UserDTO userDto) {
+        User createdUser = userService.addUser(userDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 }
