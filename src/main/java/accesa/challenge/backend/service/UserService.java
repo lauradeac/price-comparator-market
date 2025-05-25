@@ -153,14 +153,14 @@ public class UserService {
     }
 
     /**
-     * Registers a new user with the provided details.
+     * Adds a new user with the provided details.
      *
      * @param userDto the user details to register
      * @return the registered User entity
      * @throws IllegalArgumentException if the email is already taken
      */
     @Transactional
-    public User registerUser(UserDTO userDto) {
+    public User addUser(UserDTO userDto) {
         // Check if user exists
         if (userRepository.existsByEmail(userDto.getEmail())) {
             throw new IllegalArgumentException("Email already taken!");
