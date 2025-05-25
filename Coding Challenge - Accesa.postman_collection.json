@@ -1,0 +1,293 @@
+{
+	"info": {
+		"_postman_id": "6b099da7-6b10-4166-87bb-778314b388d9",
+		"name": "Coding Challenge - Accesa",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24365444",
+		"_collection_link": "https://grey-water-755713.postman.co/workspace/Team-Workspace~a96aa905-a769-4fd5-85e8-1ebd88f3cc43/collection/24365444-6b099da7-6b10-4166-87bb-778314b388d9?action=share&source=collection_link&creator=24365444"
+	},
+	"item": [
+		{
+			"name": "Import Products ",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/import/products",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"import",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Import Discounts",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/import/discounts",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"import",
+						"discounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Best Discounts",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/products/best-discounts",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"products",
+						"best-discounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Discounts",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/products/new-discounts",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"products",
+						"new-discounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Price History",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/products/price-history?store=kaufland&category=lactate&startDate=2025-05-01&endDate=2025-05-20",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"products",
+						"price-history"
+					],
+					"query": [
+						{
+							"key": "store",
+							"value": "kaufland"
+						},
+						{
+							"key": "category",
+							"value": "lactate"
+						},
+						{
+							"key": "startDate",
+							"value": "2025-05-01"
+						},
+						{
+							"key": "endDate",
+							"value": "2025-05-20"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Best Recommendations for Product Name in Date Range",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/products/recommendations?productName=lapte&fromDate=2025-05-01&toDate=2025-05-07",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"products",
+						"recommendations"
+					],
+					"query": [
+						{
+							"key": "productName",
+							"value": "lapte"
+						},
+						{
+							"key": "fromDate",
+							"value": "2025-05-01"
+						},
+						{
+							"key": "toDate",
+							"value": "2025-05-07"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Set Target Price Alert for User",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"userId\": \"6\",\r\n  \"productName\": \"piept pui\",\r\n  \"targetPrice\": 26\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/users/set-alert",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"set-alert"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register User",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"firstName\": \"Edi\",\r\n  \"lastName\": \"Deac\",\r\n  \"email\": \"edideac@gmail.com\",\r\n  \"password\": \"Password123456\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/users/register",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Optimize User Basket",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/users/optimize-basket/6",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"optimize-basket",
+						"6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Products to User Basket",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/users/add-products/6",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"add-products",
+						"6"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
